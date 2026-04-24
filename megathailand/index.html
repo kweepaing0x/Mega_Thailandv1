@@ -165,6 +165,8 @@ label.lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: b
 /* LOADING */
 .spin { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 30px auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-buy-now { margin-top: 6px; background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; text-decoration: none; }
+.btn-buy-now svg { width: 12px; height: 12px; }
 </style>
 </head>
 <body>
@@ -578,6 +580,10 @@ async function loadProducts() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             Profit တွက်မည်
           </button>
+          <a class="btn-buy-now" href="https://t.me/doublepz?text=Hello%2C%20I%20want%20to%20buy%3A%20${encodeURIComponent(p.name)}%20(฿${p.price_thb})" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Order ရန်
+          </a>
         </div>
         <div class="prod-right">
           <div class="prod-price">฿${p.price_thb}</div>
