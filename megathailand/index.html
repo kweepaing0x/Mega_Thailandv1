@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MegaThailand - Profit Calculator</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #c0392b; --red-dark: #922b21; --gold: #f0a500; --gold-light: #ffd166;
+  --navy: #12131a; --card: #1c1e2b; --surface: #252838; --border: rgba(255,255,255,0.09);
+  --text: #f0f0f0; --muted: #7b7f9e; --green: #2ecc71; --danger: #e74c3c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Prompt', 'Noto Sans Myanmar', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; padding-bottom: 90px; }
+
+/* NAV */
+.top-bar { background: linear-gradient(135deg, #b71c1c 0%, #7f0000 100%); padding: 0; position: sticky; top: 0; z-index: 999; box-shadow: 0 3px 24px rgba(0,0,0,0.6); }
+.brand-row { display: flex; align-items: center; gap: 12px; padding: 11px 16px 8px; }
+.brand-logo { width: 40px; height: 40px; background: var(--gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #000; flex-shrink: 0; letter-spacing: -0.5px; }
+.brand-text .t1 { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+.brand-text .t2 { font-size: 11px; color: rgba(255,255,255,0.65); }
+.rate-pill { margin-left: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.35); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--gold-light); font-weight: 600; white-space: nowrap; }
+.nav-tabs-row { display: flex; border-top: 1px solid rgba(255,255,255,0.12); }
+.ntab { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ntab svg { width: 18px; height: 18px; }
+.ntab.active { color: #fff; border-bottom-color: var(--gold); }
+.ntab:hover { color: rgba(255,255,255,0.85); }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+.pg-pad { padding: 14px 14px 0; }
+
+/* CARDS */
+.card-b { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 16px; margin-bottom: 14px; }
+.card-b h6 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--gold); margin-bottom: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.card-b h6 svg { width: 14px; height: 14px; }
+
+/* FORM */
+label.lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; font-weight: 600; }
+.finput { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 11px; padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none; transition: border-color .2s; }
+.finput:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240,165,0,0.18); }
+.finput::placeholder { color: rgba(255,255,255,0.22); }
+.pfx { display: flex; }
+.pfx-lbl { background: var(--surface); border: 1px solid var(--border); border-right: none; border-radius: 11px 0 0 11px; padding: 11px 13px; font-size: 13px; color: var(--muted); display: flex; align-items: center; }
+.pfx .finput { border-radius: 0 11px 11px 0; }
+.hint { font-size: 11px; color: var(--gold); margin-top: 5px; min-height: 16px; }
+
+/* SHIP BUTTONS */
+.ship-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ship-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 6px; cursor: pointer; text-align: center; transition: all .2s; }
+.ship-btn.sel { border-color: var(--gold); background: rgba(240,165,0,0.12); }
+.ship-btn .sb-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.ship-btn.sel .sb-name { color: var(--gold); }
+.ship-btn .sb-rate { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.ship-btn.sel .sb-rate { color: rgba(240,165,0,0.8); }
+.ship-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; min-height: 16px; }
+
+/* CUSTOM RATE INPUT */
+.custom-rate-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+.custom-rate-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.custom-rate-row .finput { font-size: 14px; padding: 9px 12px; }
+
+/* TOGGLE */
+.tog-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.tog-row .tl { font-size: 13px; color: var(--text); }
+.tog-row .ts { font-size: 11px; color: var(--muted); }
+.form-check-input { width: 42px; height: 23px; cursor: pointer; }
+.form-check-input:checked { background-color: var(--gold) !important; border-color: var(--gold) !important; }
+
+/* QTY */
+.qty-wrap { display: flex; align-items: center; gap: 12px; }
+.qty-btn { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .2s; line-height: 1; }
+.qty-btn:hover { border-color: var(--gold); color: var(--gold); }
+.qty-num { font-size: 24px; font-weight: 700; min-width: 44px; text-align: center; }
+.qty-input { width: 80px; }
+
+/* CALC BTN */
+.btn-go { width: 100%; background: linear-gradient(135deg, #c0392b, #e74c3c); border: none; color: #fff; border-radius: 14px; padding: 15px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all .2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; }
+.btn-go:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(192,57,43,0.5); }
+.btn-go svg { width: 20px; height: 20px; }
+
+/* RESULT */
+.res-box { border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 0; }
+.res-box.profit { background: linear-gradient(135deg, rgba(46,204,113,0.13), rgba(46,204,113,0.04)); border: 1.5px solid rgba(46,204,113,0.35); }
+.res-box.loss { background: linear-gradient(135deg, rgba(231,76,60,0.13), rgba(231,76,60,0.04)); border: 1.5px solid rgba(231,76,60,0.35); }
+.res-lbl { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.res-amt { font-size: 40px; font-weight: 700; line-height: 1; }
+.res-amt.p { color: var(--green); } .res-amt.l { color: var(--danger); }
+.res-sub { font-size: 13px; color: var(--muted); margin-top: 5px; }
+.bar-wrap { margin-top: 14px; }
+.bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.bar-track { height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+.bar-fill.p { background: linear-gradient(90deg, #1e8449, #2ecc71); }
+.bar-fill.l { background: linear-gradient(90deg, #922b21, #e74c3c); }
+
+/* BREAKDOWN */
+.bkd { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+.bkd:last-child { border-bottom: none; }
+.bkd .bl { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.bkd .bv { font-weight: 600; }
+.bkd .bv.g { color: var(--green); } .bkd .bv.r { color: var(--danger); } .bkd .bv.gold { color: var(--gold); }
+.bkd.total { border-top: 1px solid rgba(255,255,255,0.12); margin-top: 6px; padding-top: 12px; }
+.bkd.total .bl { color: var(--text); font-weight: 700; }
+.bkd.total .bv { font-size: 17px; }
+
+/* PRODUCTS PAGE */
+.prod-grid { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
+.prod-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); display: flex; gap: 12px; padding: 12px; cursor: pointer; transition: all .2s; align-items: center; }
+.prod-card:hover { border-color: rgba(240,165,0,0.4); transform: translateX(3px); }
+.prod-img { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.prod-img img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; }
+.prod-body { flex: 1; min-width: 0; }
+.prod-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-name-my { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.prod-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.prod-right { text-align: right; flex-shrink: 0; }
+.prod-price { font-size: 18px; font-weight: 700; color: var(--gold); }
+.prod-wt { font-size: 11px; color: var(--muted); }
+.btn-calc-now { margin-top: 6px; background: var(--gold); color: #000; border: none; border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+.btn-calc-now svg { width: 12px; height: 12px; }
+.tag-pill { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+.tag-hot { background: rgba(231,76,60,.2); color: #e74c3c; }
+.tag-new { background: rgba(46,204,113,.2); color: #2ecc71; }
+.section-hdr { display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 4px; }
+.section-hdr h5 { font-size: 15px; font-weight: 700; margin: 0; }
+.section-hdr span { font-size: 12px; color: var(--muted); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state svg { width: 48px; height: 48px; opacity: .4; margin-bottom: 14px; }
+
+/* FOOTER */
+.footer-links { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(18,19,26,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--border); padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.fl-btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 6px; border-radius: 12px; text-decoration: none; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all .2s; }
+.fl-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.fl-fb { background: rgba(24,119,242,0.15); color: #4a90d9; border: 1px solid rgba(24,119,242,0.25); }
+.fl-tg { background: rgba(0,136,204,0.15); color: #5ab8e0; border: 1px solid rgba(0,136,204,0.25); }
+.fl-vb { background: rgba(122,73,167,0.15); color: #b07dd4; border: 1px solid rgba(122,73,167,0.25); }
+.fl-btn:hover { transform: translateY(-1px); opacity: .85; }
+
+/* LOADING */
+.spin { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 30px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand-row">
+    <div class="brand-logo">MT</div>
+    <div class="brand-text">
+      <div class="t1">MegaThailand 🇹🇭</div>
+      <div class="t2">Border Trade Profit Calculator</div>
+    </div>
+    <div class="rate-pill" id="rate-pill">💱 1 THB = 132 MMK</div>
+  </div>
+  <div class="nav-tabs-row">
+    <a class="ntab active" onclick="showPage('calc',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+      တွက်စက်
+    </a>
+    <a class="ntab" onclick="showPage('products',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      ကုန်ပစ္စည်း
+    </a>
+  </div>
+</div>
+
+<!-- ===== CALCULATOR PAGE ===== -->
+<div id="page-calc" class="page active">
+  <div class="pg-pad">
+
+    <!-- Exchange Rate -->
+    <div class="card-b">
+      <h6>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        ငွေလဲနှုန်း (Exchange Rate)
+      </h6>
+      <label class="lbl">1 THB = ? MMK</label>
+      <input class="finput" type="number" id="ex-rate" value="132" step="0.5" oninput="onRateChange()">
+    </div>
+
+    <!-- Product Info -->
+    <div class="card-b">
+      <h6>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        ကုန်ပစ္စည်း အချက်အလက်
+      </h6>
+      <div class="mb-3">
+        <label class="lbl">🇹🇭 Thailand မူရင်းစျေး (Original Price THB)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">฿</span>
+          <input class="finput" type="number" id="thb-price" placeholder="0.00" step="0.01" oninput="autoCalc()">
+        </div>
+        <div class="hint" id="hint-thb"></div>
+      </div>
+      <div class="mb-3">
+        <label class="lbl">⚖️ အသားတင်အလေး (Net Weight)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">kg</span>
+          <input class="finput" type="number" id="net-wt" placeholder="0.00" step="0.01" oninput="autoCalc()">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="lbl">🇲🇲 Myanmar ရောင်းစျေး (Burmese Current Price)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">K</span>
+          <input class="finput" type="number" id="mm-price" placeholder="0" oninput="autoCalc()">
+        </div>
+      </div>
+      <div>
+        <label class="lbl">📦 အရေအတွက် (Quantity)</label>
+        <div class="qty-wrap">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <div class="qty-num" id="qty-show">1</div>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+          <input class="finput qty-input" type="number" id="qty" value="1" min="1" oninput="syncQty();autoCalc()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping -->
+    <div class="card-b">
+      <h6>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        ပို့ဆောင်ခ (Shipping Fee)
+      </h6>
+      <div class="ship-grid">
+        <div class="ship-btn sel" onclick="selectShip(this)" data-type="dense" id="ship-dense">
+          <div class="sb-name">ကုန်ကျစ်</div>
+          <div class="sb-rate" id="rate-dense-lbl">1,200/kg</div>
+        </div>
+        <div class="ship-btn" onclick="selectShip(this)" data-type="light" id="ship-light">
+          <div class="sb-name">ကုန်ပွ</div>
+          <div class="sb-rate" id="rate-light-lbl">12,000/kg</div>
+        </div>
+        <div class="ship-btn" onclick="selectShip(this)" data-type="none" id="ship-none">
+          <div class="sb-name">မပါ</div>
+          <div class="sb-rate">Free</div>
+        </div>
+      </div>
+      <!-- Custom rate input -->
+      <div class="custom-rate-row">
+        <label class="lbl" style="margin:0">ကိုယ်တိုင်သတ်မှတ် (MMK/kg):</label>
+        <input class="finput" type="number" id="custom-ship-rate" placeholder="ထည့်ပါ" style="flex:1; padding:9px 12px; font-size:13px;" oninput="onCustomShip()">
+      </div>
+      <div class="ship-note" id="ship-note"></div>
+    </div>
+
+    <!-- Shopper Fee -->
+    <div class="card-b">
+      <h6>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Shopper Fee (Optional)
+      </h6>
+      <div class="tog-row">
+        <div>
+          <div class="tl">Shopper ခ ထည့်မည်</div>
+          <div class="ts" id="shopper-desc">10% of (original × rate)</div>
+        </div>
+        <input class="form-check-input" type="checkbox" id="shopper-tog" onchange="autoCalc()">
+      </div>
+    </div>
+
+    <!-- Duty -->
+    <div class="card-b">
+      <h6>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        အကောက်ခွန် / Duty (Optional)
+      </h6>
+      <div class="tog-row">
+        <div>
+          <div class="tl">Duty ထည့်မည်</div>
+          <div class="ts">% of (original price × rate)</div>
+        </div>
+        <input class="form-check-input" type="checkbox" id="duty-tog" onchange="toggleDutyInput(); autoCalc()">
+      </div>
+      <div id="duty-input-wrap" style="display:none; margin-top:10px;">
+        <label class="lbl">Duty % (default 0)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">%</span>
+          <input class="finput" type="number" id="duty-pct" value="0" min="0" max="100" step="0.1" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="hint" id="duty-hint"></div>
+      </div>
+    </div>
+
+    <button class="btn-go" onclick="calculate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      အမြတ် တွက်ချက်မည်
+    </button>
+
+    <!-- RESULT SECTION -->
+    <div id="result-wrap" style="display:none; margin-top:14px;">
+      <div class="card-b" style="padding:0; overflow:hidden;">
+        <div class="res-box profit" id="res-box" style="border:none; border-radius:0; margin:0;">
+          <div class="res-lbl">တစ်ခုချင်းအမြတ် (Per Unit Profit)</div>
+          <div class="res-amt p" id="res-amt">0 MMK</div>
+          <div class="res-sub" id="res-sub"></div>
+        </div>
+        <div style="padding:16px;">
+          <div class="bar-wrap">
+            <div class="bar-labels"><span>Profit Margin</span><span id="margin-pct">0%</span></div>
+            <div class="bar-track"><div class="bar-fill p" id="bar-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-b">
+        <h6><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>အသေးစိတ် Breakdown</h6>
+        <div class="bkd"><span class="bl">🇲🇲 Myanmar ရောင်းစျေး</span><span class="bv g" id="b-mm">−</span></div>
+        <div class="bkd"><span class="bl">🇹🇭 မူရင်းစျေး (THB→MMK)</span><span class="bv r" id="b-thb">−</span></div>
+        <div class="bkd"><span class="bl">🚚 ပို့ဆောင်ခ</span><span class="bv r" id="b-ship">−</span></div>
+        <div class="bkd" id="b-shopper-row" style="display:none"><span class="bl">🛒 Shopper Fee</span><span class="bv r" id="b-shopper">−</span></div>
+        <div class="bkd" id="b-duty-row" style="display:none"><span class="bl">🏛️ Duty / အကောက်ခွန်</span><span class="bv r" id="b-duty">−</span></div>
+        <div class="bkd total"><span class="bl">💰 အမြတ်စုစုပေါင်း</span><span class="bv gold" id="b-total">−</span></div>
+        <div class="bkd"><span class="bl">📦 အရေအတွက်</span><span class="bv" id="b-qty">−</span></div>
+      </div>
+    </div>
+
+  </div><!-- /pg-pad -->
+</div>
+
+<!-- ===== PRODUCTS PAGE ===== -->
+<div id="page-products" class="page">
+  <div class="section-hdr">
+    <h5>📦 ကုန်ပစ္စည်းစာရင်း</h5>
+    <span id="prod-count"></span>
+  </div>
+  <div id="prod-list">
+    <div class="spin"></div>
+  </div>
+</div>
+
+<!-- FOOTER LINKS -->
+<div class="footer-links">
+  <a class="fl-btn fl-fb" href="https://facebook.com/megathailand" target="_blank">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+    MegaThailand
+  </a>
+  <a class="fl-btn fl-tg" href="https://t.me/doublepz" target="_blank">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    @doublepz
+  </a>
+  <a class="fl-btn fl-vb" href="viber://chat?number=09445654891">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.19 1.19 2 2 0 012.18 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.08 6.08l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    09445654891
+  </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script>
+// ===== STATE =====
+let shipType = 'dense';
+let shipRates = { dense: 1200, light: 12000, none: 0 };
+let shopperPct = 10;
+let qty = 1;
+
+// ===== NAV =====
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'products') loadProducts();
+}
+
+// ===== SETTINGS FROM SUPABASE =====
+async function loadSettings() {
+  try {
+    const { data } = await supabase.from('settings').select('*');
+    if (!data) return;
+    data.forEach(s => {
+      if (s.key === 'exchange_rate') {
+        document.getElementById('ex-rate').value = s.value;
+        onRateChange();
+      }
+      if (s.key === 'ship_dense_mmk_per_kg') {
+        shipRates.dense = parseFloat(s.value);
+        document.getElementById('rate-dense-lbl').textContent = fmt(shipRates.dense) + '/kg';
+      }
+      if (s.key === 'ship_light_mmk_per_kg') {
+        shipRates.light = parseFloat(s.value);
+        document.getElementById('rate-light-lbl').textContent = fmt(shipRates.light) + '/kg';
+      }
+      if (s.key === 'shopper_fee_pct') {
+        shopperPct = parseFloat(s.value);
+        document.getElementById('shopper-desc').textContent = shopperPct + '% of (original × rate)';
+      }
+    });
+  } catch(e) {}
+}
+
+// ===== RATE =====
+function onRateChange() {
+  const r = parseFloat(document.getElementById('ex-rate').value) || 132;
+  document.getElementById('rate-pill').textContent = '💱 1 THB = ' + r + ' MMK';
+  autoCalc();
+}
+
+// ===== SHIP =====
+function selectShip(el) {
+  document.querySelectorAll('.ship-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  shipType = el.dataset.type;
+  document.getElementById('custom-ship-rate').value = '';
+  updateShipNote();
+  autoCalc();
+}
+function onCustomShip() {
+  const v = parseFloat(document.getElementById('custom-ship-rate').value);
+  if (v > 0) {
+    document.querySelectorAll('.ship-btn').forEach(b => b.classList.remove('sel'));
+    shipType = 'custom';
+    shipRates.custom = v;
+    autoCalc();
+  }
+  updateShipNote();
+}
+function updateShipNote() {
+  const wt = parseFloat(document.getElementById('net-wt').value) || 0;
+  const rate = getCurrentShipRate();
+  if (wt > 0 && rate > 0) {
+    document.getElementById('ship-note').textContent = '📦 ' + wt + ' kg × ' + fmt(rate) + ' = ' + fmt(wt * rate) + ' MMK';
+  } else {
+    document.getElementById('ship-note').textContent = '';
+  }
+}
+function getCurrentShipRate() {
+  if (shipType === 'custom') return shipRates.custom || 0;
+  return shipRates[shipType] || 0;
+}
+
+// ===== QTY =====
+function changeQty(d) {
+  qty = Math.max(1, qty + d);
+  document.getElementById('qty').value = qty;
+  document.getElementById('qty-show').textContent = qty;
+  autoCalc();
+}
+function syncQty() {
+  qty = Math.max(1, parseInt(document.getElementById('qty').value) || 1);
+  document.getElementById('qty-show').textContent = qty;
+}
+
+// ===== CALCULATE =====
+function toggleDutyInput() {
+  const on = document.getElementById('duty-tog').checked;
+  document.getElementById('duty-input-wrap').style.display = on ? 'block' : 'none';
+  if (!on) { document.getElementById('duty-pct').value = '0'; }
+}
+
+function autoCalc() {
+  updateShipNote();
+  const thb = parseFloat(document.getElementById('thb-price').value) || 0;
+  const rate = parseFloat(document.getElementById('ex-rate').value) || 132;
+  if (thb > 0) {
+    document.getElementById('hint-thb').textContent = '≈ ' + fmt(thb * rate) + ' MMK';
+  } else {
+    document.getElementById('hint-thb').textContent = '';
+  }
+  const mm = parseFloat(document.getElementById('mm-price').value) || 0;
+  if (thb && mm) calculate();
+}
+
+function calculate() {
+  const rate = parseFloat(document.getElementById('ex-rate').value) || 132;
+  const thb = parseFloat(document.getElementById('thb-price').value) || 0;
+  const wt = parseFloat(document.getElementById('net-wt').value) || 0;
+  const mm = parseFloat(document.getElementById('mm-price').value) || 0;
+  const q = parseInt(document.getElementById('qty').value) || 1;
+  const shopOn = document.getElementById('shopper-tog').checked;
+  const dutyOn = document.getElementById('duty-tog').checked;
+  const dutyPct = dutyOn ? (parseFloat(document.getElementById('duty-pct').value) || 0) : 0;
+  if (!thb || !mm) return;
+
+  const origMMK = thb * rate;
+  const shipCost = wt * getCurrentShipRate();
+  const shopFee = shopOn ? origMMK * (shopperPct / 100) : 0;
+  const dutyFee = origMMK * (dutyPct / 100);
+  const totalCost = origMMK + shipCost + shopFee + dutyFee;
+  const profitUnit = mm - totalCost;
+  const totalProfit = profitUnit * q;
+  const margin = totalCost > 0 ? (profitUnit / totalCost) * 100 : 0;
+  const isProfit = profitUnit >= 0;
+
+  // update duty hint
+  if (dutyOn && dutyPct > 0) {
+    document.getElementById('duty-hint').textContent = '= ' + fmt(dutyFee) + ' MMK';
+  } else if (dutyOn) {
+    document.getElementById('duty-hint').textContent = '';
+  }
+
+  document.getElementById('result-wrap').style.display = 'block';
+  const box = document.getElementById('res-box');
+  box.className = 'res-box ' + (isProfit ? 'profit' : 'loss');
+  const amtEl = document.getElementById('res-amt');
+  amtEl.className = 'res-amt ' + (isProfit ? 'p' : 'l');
+  amtEl.textContent = (isProfit ? '+' : '') + fmt(profitUnit) + ' MMK';
+  document.getElementById('res-sub').textContent = q > 1 ? '× ' + q + ' = ' + (isProfit ? '+' : '') + fmt(totalProfit) + ' MMK total' : '';
+
+  const mPct = Math.min(Math.abs(margin), 100);
+  document.getElementById('margin-pct').textContent = margin.toFixed(1) + '%';
+  const fill = document.getElementById('bar-fill');
+  fill.style.width = mPct + '%';
+  fill.className = 'bar-fill ' + (isProfit ? 'p' : 'l');
+
+  document.getElementById('b-mm').textContent = fmt(mm) + ' MMK';
+  document.getElementById('b-thb').textContent = '− ' + fmt(origMMK) + ' MMK';
+  document.getElementById('b-ship').textContent = '− ' + fmt(shipCost) + ' MMK';
+  document.getElementById('b-shopper-row').style.display = shopOn ? 'flex' : 'none';
+  document.getElementById('b-shopper').textContent = '− ' + fmt(shopFee) + ' MMK (' + shopperPct + '%)';
+  document.getElementById('b-duty-row').style.display = (dutyOn && dutyPct > 0) ? 'flex' : 'none';
+  document.getElementById('b-duty').textContent = '− ' + fmt(dutyFee) + ' MMK (' + dutyPct + '%)';
+  document.getElementById('b-total').textContent = (isProfit ? '+' : '') + fmt(totalProfit) + ' MMK';
+  document.getElementById('b-qty').textContent = q + ' ခု';
+}
+
+// ===== PRODUCTS =====
+async function loadProducts() {
+  const list = document.getElementById('prod-list');
+  list.innerHTML = '<div class="spin"></div>';
+  try {
+    const { data, error } = await supabase.from('products').select('*').eq('is_active', true).order('created_at', { ascending: false });
+    if (error || !data || data.length === 0) {
+      list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg><div>ကုန်ပစ္စည်း မရှိသေးပါ</div></div>';
+      return;
+    }
+    document.getElementById('prod-count').textContent = data.length + ' items';
+    list.innerHTML = '<div class="prod-grid">' + data.map(p => `
+      <div class="prod-card">
+        <div class="prod-img">
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" onerror="this.parentElement.textContent='🛍️'">` : '🛍️'}
+        </div>
+        <div class="prod-body">
+          <div class="prod-name">${p.name}${p.tag === 'hot' ? '<span class="tag-pill tag-hot">HOT🔥</span>' : p.tag === 'new' ? '<span class="tag-pill tag-new">NEW✨</span>' : ''}</div>
+          ${p.name_my ? `<div class="prod-name-my">${p.name_my}</div>` : ''}
+          <div class="prod-meta">${p.category || ''} · ${p.weight_kg} kg</div>
+          <button class="btn-calc-now" onclick="calcFromProduct(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            Profit တွက်မည်
+          </button>
+        </div>
+        <div class="prod-right">
+          <div class="prod-price">฿${p.price_thb}</div>
+          <div class="prod-wt">${p.weight_kg} kg</div>
+        </div>
+      </div>
+    `).join('') + '</div>';
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div>ကုန်ပစ္စည်း မရှိသေးပါ</div></div>';
+  }
+}
+
+function calcFromProduct(p) {
+  document.getElementById('thb-price').value = p.price_thb;
+  document.getElementById('net-wt').value = p.weight_kg;
+  showPage('calc', document.querySelectorAll('.ntab')[0]);
+  document.getElementById('hint-thb').textContent = '≈ ' + fmt(p.price_thb * (parseFloat(document.getElementById('ex-rate').value) || 132)) + ' MMK';
+  window.scrollTo(0,0);
+}
+
+function fmt(n) { return Math.round(n).toLocaleString(); }
+
+// Init
+loadSettings();
+</script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MegaThailand Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #c0392b; --gold: #f0a500; --navy: #12131a; --card: #1c1e2b;
+  --surface: #252838; --border: rgba(255,255,255,0.09); --text: #f0f0f0;
+  --muted: #7b7f9e; --green: #2ecc71; --danger: #e74c3c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Prompt', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+
+/* LOGIN */
+#login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+.login-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 360px; text-align: center; }
+.login-logo { width: 72px; height: 72px; background: linear-gradient(135deg, #c0392b, #7f0000); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px; }
+.login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.login-card p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+/* ADMIN LAYOUT */
+#admin-screen { display: none; }
+.admin-bar { background: linear-gradient(135deg, #b71c1c, #7f0000); padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 99; }
+.admin-bar .ab-logo { width: 34px; height: 34px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #000; flex-shrink: 0; }
+.admin-bar .ab-title { font-size: 15px; font-weight: 700; }
+.admin-bar .ab-sub { font-size: 11px; color: rgba(255,255,255,0.6); }
+.btn-logout { margin-left: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+/* TABS */
+.admin-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.atab { padding: 13px 18px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; transition: all .2s; display: flex; align-items: center; gap: 7px; }
+.atab svg { width: 16px; height: 16px; }
+.atab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.atab:hover { color: var(--text); }
+
+.apage { display: none; padding: 16px; }
+.apage.active { display: block; }
+
+/* CARDS */
+.acard { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 18px; margin-bottom: 16px; }
+.acard h5 { font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.acard h5 svg { width: 16px; height: 16px; }
+
+/* FORM */
+.lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; font-weight: 600; }
+.finput { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 11px; padding: 11px 14px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .2s; }
+.finput:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240,165,0,0.15); }
+.finput::placeholder { color: rgba(255,255,255,0.22); }
+.pfx { display: flex; }
+.pfx-lbl { background: var(--surface); border: 1px solid var(--border); border-right: none; border-radius: 11px 0 0 11px; padding: 11px 12px; font-size: 12px; color: var(--muted); display: flex; align-items: center; }
+.pfx .finput { border-radius: 0 11px 11px 0; }
+select.finput option { background: var(--navy); }
+
+/* BUTTONS */
+.btn-pri { width: 100%; background: linear-gradient(135deg, #c0392b, #e74c3c); border: none; color: #fff; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 9px; transition: all .2s; }
+.btn-pri:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,57,43,.45); }
+.btn-pri svg { width: 18px; height: 18px; }
+.btn-sml { padding: 7px 14px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all .2s; }
+.btn-sml svg { width: 13px; height: 13px; }
+.btn-edit { background: rgba(240,165,0,.15); color: var(--gold); border: 1px solid rgba(240,165,0,.3); }
+.btn-del { background: rgba(231,76,60,.15); color: var(--danger); border: 1px solid rgba(231,76,60,.3); }
+.btn-save { background: rgba(46,204,113,.15); color: var(--green); border: 1px solid rgba(46,204,113,.3); }
+.btn-cancel { background: rgba(255,255,255,.07); color: var(--muted); border: 1px solid var(--border); }
+.finput-login { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 12px; padding: 13px 16px; font-size: 15px; font-family: inherit; outline: none; transition: border-color .2s; margin-bottom: 14px; }
+.finput-login:focus { border-color: var(--gold); }
+.btn-login { width: 100%; background: linear-gradient(135deg, #c0392b, #e74c3c); border: none; color: #fff; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.err-msg { color: var(--danger); font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+
+/* IMAGE UPLOAD */
+.img-drop { border: 2px dashed rgba(240,165,0,0.35); border-radius: 14px; padding: 24px; text-align: center; cursor: pointer; background: rgba(240,165,0,0.04); transition: all .2s; position: relative; }
+.img-drop:hover, .img-drop.over { border-color: var(--gold); background: rgba(240,165,0,0.09); }
+.img-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.img-preview { width: 90px; height: 90px; border-radius: 12px; object-fit: cover; margin-bottom: 10px; }
+.img-drop-icon { font-size: 36px; margin-bottom: 8px; }
+.img-drop p { font-size: 13px; color: var(--muted); margin: 0; }
+.img-drop small { font-size: 11px; color: rgba(255,255,255,0.3); }
+.upload-progress { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; }
+.upload-bar { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; transition: width .3s; }
+
+/* PRODUCT LIST (admin) */
+.aprod { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: 14px; margin-bottom: 10px; }
+.aprod-header { display: flex; gap: 12px; align-items: flex-start; }
+.aprod-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: var(--card); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.aprod-img img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; }
+.aprod-info { flex: 1; min-width: 0; }
+.aprod-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aprod-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.aprod-price { font-size: 16px; font-weight: 700; color: var(--gold); }
+.aprod-actions { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
+.tag-pill { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+.tag-hot { background: rgba(231,76,60,.2); color: #e74c3c; }
+.tag-new { background: rgba(46,204,113,.2); color: #2ecc71; }
+.inactive-badge { background: rgba(255,255,255,.1); color: var(--muted); padding: 2px 8px; border-radius: 6px; font-size: 10px; margin-left: 6px; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-box { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: 16px; text-align: center; }
+.stat-num { font-size: 32px; font-weight: 700; color: var(--gold); }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* SETTINGS */
+.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.setting-row label { font-size: 13px; color: var(--muted); min-width: 160px; flex-shrink: 0; }
+.setting-row .finput { flex: 1; padding: 10px 12px; }
+.btn-update { padding: 10px 16px; border-radius: 10px; background: rgba(240,165,0,.15); color: var(--gold); border: 1px solid rgba(240,165,0,.3); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+/* EDIT MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; display: flex; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+.modal-box { background: var(--card); border-radius: 20px; border: 1px solid var(--border); width: 100%; max-width: 480px; padding: 22px; margin: auto; }
+.modal-box h4 { font-size: 16px; font-weight: 700; margin-bottom: 18px; color: var(--gold); }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+.modal-actions button { flex: 1; }
+
+/* TOAST */
+.toast-wrap { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 10px 22px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; animation: toastIn .3s ease; white-space: nowrap; }
+.toast.ok { border-color: rgba(46,204,113,.4); color: var(--green); }
+.toast.err { border-color: rgba(231,76,60,.4); color: var(--danger); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.spin { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 30px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h2>Admin Panel</h2>
+    <p>MegaThailand Management</p>
+    <input class="finput-login" type="password" id="pass-input" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="btn-login" onclick="doLogin()">🔓 Login</button>
+    <div class="err-msg" id="err-msg">❌ Password မှားသည်</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <div class="admin-bar">
+    <div class="ab-logo">MT</div>
+    <div>
+      <div class="ab-title">MegaThailand Admin</div>
+      <div class="ab-sub">Management Panel</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+  </div>
+
+  <div class="admin-tabs">
+    <div class="atab active" onclick="showATab('products',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      Products
+    </div>
+    <div class="atab" onclick="showATab('add',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Add Product
+    </div>
+    <div class="atab" onclick="showATab('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Settings
+    </div>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div id="apage-products" class="apage active">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Total Products</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-active" style="color:var(--green)">0</div><div class="stat-lbl">Active</div></div>
+    </div>
+    <div id="aprod-list"><div class="spin"></div></div>
+  </div>
+
+  <!-- ADD PRODUCT TAB -->
+  <div id="apage-add" class="apage">
+    <div class="acard">
+      <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add New Product</h5>
+
+      <div class="mb-3">
+        <label class="lbl">Product Photo</label>
+        <div class="img-drop" id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <input type="file" id="img-file" accept="image/*" onchange="onFileSelect(event)">
+          <div id="drop-content">
+            <div class="img-drop-icon">📷</div>
+            <p>Tap to upload or drag & drop</p>
+            <small>JPG, PNG, WEBP — max 5MB</small>
+          </div>
+          <div class="upload-progress" id="upload-prog"><div class="upload-bar" id="upload-bar"></div></div>
+        </div>
+        <input type="hidden" id="img-url" value="">
+      </div>
+
+      <div class="mb-3">
+        <label class="lbl">Product Name (English)</label>
+        <input class="finput" type="text" id="p-name" placeholder="e.g. Thai Jasmine Rice 5kg">
+      </div>
+      <div class="mb-3">
+        <label class="lbl">ကုန်ပစ္စည်းအမည် (Myanmar)</label>
+        <input class="finput" type="text" id="p-namemy" placeholder="e.g. ထိုင်းကြာဆန်">
+      </div>
+      <div class="mb-3">
+        <label class="lbl">Category</label>
+        <input class="finput" type="text" id="p-cat" placeholder="Food / Beauty / Health / Beverage...">
+      </div>
+      <div class="mb-3">
+        <label class="lbl">Price (THB)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">฿</span>
+          <input class="finput" type="number" id="p-price" placeholder="0.00" step="0.01">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="lbl">Net Weight (kg)</label>
+        <div class="pfx">
+          <span class="pfx-lbl">kg</span>
+          <input class="finput" type="number" id="p-wt" placeholder="0.00" step="0.01">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="lbl">Tag</label>
+        <select class="finput" id="p-tag">
+          <option value="">None</option>
+          <option value="new">✨ New</option>
+          <option value="hot">🔥 Hot</option>
+        </select>
+      </div>
+      <button class="btn-pri" onclick="addProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="apage-settings" class="apage">
+    <div class="acard">
+      <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Exchange Rate</h5>
+      <div class="setting-row">
+        <label>1 THB = ? MMK</label>
+        <input class="finput" type="number" id="s-rate" placeholder="132">
+        <button class="btn-update" onclick="saveSetting('exchange_rate','s-rate')">Save</button>
+      </div>
+    </div>
+    <div class="acard">
+      <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Shipping Fees (MMK/kg)</h5>
+      <div class="setting-row">
+        <label>ကုန်ကျစ် (Dense)</label>
+        <input class="finput" type="number" id="s-dense" placeholder="1200">
+        <button class="btn-update" onclick="saveSetting('ship_dense_mmk_per_kg','s-dense')">Save</button>
+      </div>
+      <div class="setting-row">
+        <label>ကုန်ပွ (Light)</label>
+        <input class="finput" type="number" id="s-light" placeholder="12000">
+        <button class="btn-update" onclick="saveSetting('ship_light_mmk_per_kg','s-light')">Save</button>
+      </div>
+    </div>
+    <div class="acard">
+      <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M16 10a4 4 0 01-8 0"/></svg>Shopper Fee</h5>
+      <div class="setting-row">
+        <label>Shopper Fee %</label>
+        <input class="finput" type="number" id="s-shopper" placeholder="10">
+        <button class="btn-update" onclick="saveSetting('shopper_fee_pct','s-shopper')">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h4>✏️ Edit Product</h4>
+    <input type="hidden" id="edit-id">
+
+    <div class="mb-3">
+      <label class="lbl">Product Photo</label>
+      <div class="img-drop" id="edit-drop-zone" ondragover="onDragOver(event,true)" ondragleave="onDragLeave(event,true)" ondrop="onDrop(event,true)">
+        <input type="file" id="edit-img-file" accept="image/*" onchange="onFileSelect(event,true)">
+        <div id="edit-drop-content">
+          <div class="img-drop-icon">📷</div>
+          <p>Tap to replace photo</p>
+        </div>
+        <div class="upload-progress" id="edit-upload-prog"><div class="upload-bar" id="edit-upload-bar"></div></div>
+      </div>
+      <input type="hidden" id="edit-img-url">
+    </div>
+
+    <div class="mb-3"><label class="lbl">Name (EN)</label><input class="finput" type="text" id="edit-name"></div>
+    <div class="mb-3"><label class="lbl">Name (Myanmar)</label><input class="finput" type="text" id="edit-namemy"></div>
+    <div class="mb-3"><label class="lbl">Category</label><input class="finput" type="text" id="edit-cat"></div>
+    <div class="mb-3">
+      <label class="lbl">Price (THB)</label>
+      <div class="pfx"><span class="pfx-lbl">฿</span><input class="finput" type="number" id="edit-price" step="0.01"></div>
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Weight (kg)</label>
+      <div class="pfx"><span class="pfx-lbl">kg</span><input class="finput" type="number" id="edit-wt" step="0.01"></div>
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Tag</label>
+      <select class="finput" id="edit-tag">
+        <option value="">None</option>
+        <option value="new">✨ New</option>
+        <option value="hot">🔥 Hot</option>
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="lbl">Status</label>
+      <select class="finput" id="edit-active">
+        <option value="true">✅ Active</option>
+        <option value="false">⛔ Hidden</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sml btn-cancel" style="flex:1; padding:12px; font-size:14px;" onclick="closeModal()">Cancel</button>
+      <button class="btn-sml btn-save" style="flex:2; padding:12px; font-size:14px;" onclick="saveEdit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ============================================================
+// FILL IN YOUR SUPABASE CREDENTIALS
+// ============================================================
+const SUPABASE_URL = "https://your-project-id.supabase.co";
+const SUPABASE_ANON_KEY = "your-anon-key-here";
+// ============================================================
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const ADMIN_PASS = "PAING123";
+let pendingUploadFile = null;
+let editPendingUploadFile = null;
+
+// ===== LOGIN =====
+function doLogin() {
+  const pw = document.getElementById('pass-input').value;
+  if (pw === ADMIN_PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadProducts();
+    loadSettings();
+  } else {
+    document.getElementById('err-msg').style.display = 'block';
+    document.getElementById('pass-input').value = '';
+  }
+}
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('pass-input').value = '';
+  document.getElementById('err-msg').style.display = 'none';
+}
+document.getElementById('pass-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ===== TABS =====
+function showATab(id, el) {
+  document.querySelectorAll('.apage').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
+  document.getElementById('apage-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ===== IMAGE UPLOAD =====
+function onDragOver(e, isEdit) { e.preventDefault(); (isEdit ? document.getElementById('edit-drop-zone') : document.getElementById('drop-zone')).classList.add('over'); }
+function onDragLeave(e, isEdit) { (isEdit ? document.getElementById('edit-drop-zone') : document.getElementById('drop-zone')).classList.remove('over'); }
+function onDrop(e, isEdit) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) handleImageFile(file, isEdit);
+}
+function onFileSelect(e, isEdit) {
+  const file = e.target.files[0];
+  if (file) handleImageFile(file, isEdit);
+}
+
+function handleImageFile(file, isEdit) {
+  if (!file.type.startsWith('image/')) { toast('Image files only', false); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('Max 5MB', false); return; }
+  if (isEdit) editPendingUploadFile = file;
+  else pendingUploadFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const prefix = isEdit ? 'edit-' : '';
+    document.getElementById(prefix + 'drop-content').innerHTML =
+      `<img class="img-preview" src="${e.target.result}"><p style="font-size:12px;color:var(--green)">✅ ${file.name}</p>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadImage(file, prefix) {
+  const prog = document.getElementById(prefix + 'upload-prog');
+  const bar = document.getElementById(prefix + 'upload-bar');
+  prog.style.display = 'block'; bar.style.width = '30%';
+  const ext = file.name.split('.').pop();
+  const path = `products/${Date.now()}.${ext}`;
+  bar.style.width = '60%';
+  const { data, error } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+  bar.style.width = '100%';
+  if (error) { toast('Upload failed: ' + error.message, false); prog.style.display = 'none'; return null; }
+  const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+  prog.style.display = 'none';
+  return urlData.publicUrl;
+}
+
+// ===== PRODUCTS =====
+async function loadProducts() {
+  const list = document.getElementById('aprod-list');
+  list.innerHTML = '<div class="spin"></div>';
+  const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+  if (error || !data) { list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:30px;">Error loading products</p>'; return; }
+  document.getElementById('stat-total').textContent = data.length;
+  document.getElementById('stat-active').textContent = data.filter(p => p.is_active).length;
+  if (data.length === 0) { list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:40px;">No products yet</p>'; return; }
+  list.innerHTML = data.map(p => `
+    <div class="aprod" id="aprod-${p.id}">
+      <div class="aprod-header">
+        <div class="aprod-img">
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" onerror="this.parentElement.textContent='🛍️'">` : '🛍️'}
+        </div>
+        <div class="aprod-info">
+          <div class="aprod-name">${p.name}
+            ${p.tag === 'hot' ? '<span class="tag-pill tag-hot">HOT🔥</span>' : p.tag === 'new' ? '<span class="tag-pill tag-new">NEW✨</span>' : ''}
+            ${!p.is_active ? '<span class="inactive-badge">HIDDEN</span>' : ''}
+          </div>
+          <div class="aprod-meta">${p.category || '—'} · ${p.weight_kg} kg · ${p.name_my || ''}</div>
+          <div class="aprod-price">฿${p.price_thb}</div>
+        </div>
+      </div>
+      <div class="aprod-actions">
+        <button class="btn-sml btn-edit" onclick="openEdit(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="btn-sml btn-del" onclick="deleteProduct('${p.id}','${p.image_url || ''}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Delete
+        </button>
+        <button class="btn-sml ${p.is_active ? 'btn-del' : 'btn-save'}" onclick="toggleActive('${p.id}', ${p.is_active})">
+          ${p.is_active ? '⛔ Hide' : '✅ Show'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function addProduct() {
+  const name = document.getElementById('p-name').value.trim();
+  const namemy = document.getElementById('p-namemy').value.trim();
+  const cat = document.getElementById('p-cat').value.trim();
+  const price = parseFloat(document.getElementById('p-price').value);
+  const wt = parseFloat(document.getElementById('p-wt').value);
+  const tag = document.getElementById('p-tag').value;
+  if (!name || !price || !wt) { toast('Fill in required fields', false); return; }
+
+  let imageUrl = null;
+  if (pendingUploadFile) {
+    imageUrl = await uploadImage(pendingUploadFile, '');
+    if (!imageUrl) return;
+  }
+
+  const { error } = await sb.from('products').insert({ name, name_my: namemy, category: cat, price_thb: price, weight_kg: wt, tag, image_url: imageUrl });
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('✅ Product added!', true);
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-namemy').value = '';
+  document.getElementById('p-cat').value = '';
+  document.getElementById('p-price').value = '';
+  document.getElementById('p-wt').value = '';
+  document.getElementById('p-tag').value = '';
+  document.getElementById('drop-content').innerHTML = '<div class="img-drop-icon">📷</div><p>Tap to upload or drag & drop</p><small>JPG, PNG, WEBP — max 5MB</small>';
+  pendingUploadFile = null;
+  loadProducts();
+  showATab('products', document.querySelectorAll('.atab')[0]);
+}
+
+async function deleteProduct(id, imgUrl) {
+  if (!confirm('Delete this product?')) return;
+  if (imgUrl) {
+    const path = imgUrl.split('/product-images/')[1];
+    if (path) await sb.storage.from('product-images').remove([path]);
+  }
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('🗑️ Deleted', true);
+  loadProducts();
+}
+
+async function toggleActive(id, current) {
+  const { error } = await sb.from('products').update({ is_active: !current }).eq('id', id);
+  if (error) { toast('Error', false); return; }
+  toast(current ? '⛔ Hidden' : '✅ Shown', true);
+  loadProducts();
+}
+
+// ===== EDIT MODAL =====
+function openEdit(p) {
+  document.getElementById('edit-id').value = p.id;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-namemy').value = p.name_my || '';
+  document.getElementById('edit-cat').value = p.category || '';
+  document.getElementById('edit-price').value = p.price_thb;
+  document.getElementById('edit-wt').value = p.weight_kg;
+  document.getElementById('edit-tag').value = p.tag || '';
+  document.getElementById('edit-active').value = p.is_active ? 'true' : 'false';
+  document.getElementById('edit-img-url').value = p.image_url || '';
+  editPendingUploadFile = null;
+  const dc = document.getElementById('edit-drop-content');
+  if (p.image_url) {
+    dc.innerHTML = `<img class="img-preview" src="${p.image_url}" onerror="this.style.display='none'"><p style="font-size:12px; color:var(--muted)">Tap to replace</p>`;
+  } else {
+    dc.innerHTML = '<div class="img-drop-icon">📷</div><p>Tap to upload photo</p>';
+  }
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+async function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const name = document.getElementById('edit-name').value.trim();
+  const namemy = document.getElementById('edit-namemy').value.trim();
+  const cat = document.getElementById('edit-cat').value.trim();
+  const price = parseFloat(document.getElementById('edit-price').value);
+  const wt = parseFloat(document.getElementById('edit-wt').value);
+  const tag = document.getElementById('edit-tag').value;
+  const isActive = document.getElementById('edit-active').value === 'true';
+  if (!name || !price || !wt) { toast('Fill required fields', false); return; }
+
+  let imageUrl = document.getElementById('edit-img-url').value || null;
+  if (editPendingUploadFile) {
+    imageUrl = await uploadImage(editPendingUploadFile, 'edit-');
+    if (!imageUrl) return;
+  }
+
+  const { error } = await sb.from('products').update({ name, name_my: namemy, category: cat, price_thb: price, weight_kg: wt, tag, is_active: isActive, image_url: imageUrl }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('✅ Saved!', true);
+  closeModal();
+  loadProducts();
+}
+
+// ===== SETTINGS =====
+async function loadSettings() {
+  const { data } = await sb.from('settings').select('*');
+  if (!data) return;
+  const map = {};
+  data.forEach(s => map[s.key] = s.value);
+  if (map.exchange_rate) document.getElementById('s-rate').value = map.exchange_rate;
+  if (map.ship_dense_mmk_per_kg) document.getElementById('s-dense').value = map.ship_dense_mmk_per_kg;
+  if (map.ship_light_mmk_per_kg) document.getElementById('s-light').value = map.ship_light_mmk_per_kg;
+  if (map.shopper_fee_pct) document.getElementById('s-shopper').value = map.shopper_fee_pct;
+}
+
+async function saveSetting(key, inputId) {
+  const val = document.getElementById(inputId).value;
+  if (!val) { toast('Enter a value', false); return; }
+  const { error } = await sb.from('settings').upsert({ key, value: String(val), updated_at: new Date().toISOString() });
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('✅ Saved: ' + key, true);
+}
+
+// ===== TOAST =====
+function toast(msg, ok) {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (ok ? 'ok' : 'err');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+</script>
+</body>
+</html>
