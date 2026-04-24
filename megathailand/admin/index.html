@@ -446,7 +446,7 @@ async function loadProducts() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           Delete
         </button>
-        <button class="btn-sml ${p.is_active ? 'btn-del' : 'btn-save'}" onclick="toggleActive('${p.id}', ${p.is_active})">
+        <button class="btn-sml ${p.is_active ? 'btn-del' : 'btn-save'}" onclick="toggleActive('${p.id}', '${p.is_active}')">
           ${p.is_active ? '⛔ Hide' : '✅ Show'}
         </button>
       </div>
@@ -497,9 +497,10 @@ async function deleteProduct(id, imgUrl) {
 }
 
 async function toggleActive(id, current) {
-  const { error } = await sb.from('products').update({ is_active: !current }).eq('id', id);
-  if (error) { toast('Error', false); return; }
-  toast(current ? '⛔ Hidden' : '✅ Shown', true);
+  const isCurrentlyActive = current === true || current === 'true';
+  const { error } = await sb.from('products').update({ is_active: !isCurrentlyActive }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast(isCurrentlyActive ? '⛔ Hidden from users' : '✅ Now visible to users', true);
   loadProducts();
 }
 
