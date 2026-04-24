@@ -122,6 +122,24 @@ select.finput option { background: var(--navy); }
 .toast.err { border-color: rgba(231,76,60,.4); color: var(--danger); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+
+/* SUPPLIER ADMIN */
+.sup-item { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 14px; margin-bottom: 10px; }
+.sup-item-top { display: flex; gap: 12px; align-items: center; }
+.sup-logo-sm { width: 52px; height: 52px; border-radius: 10px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; }
+.sup-logo-sm img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.sup-item-info { flex: 1; min-width: 0; }
+.sup-item-name { font-size: 14px; font-weight: 700; }
+.sup-item-cat { font-size: 11px; color: var(--gold); margin-top: 2px; }
+.sup-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sup-actions { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.vis-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+.vis-row:last-child { border-bottom: none; }
+.vis-row label { color: var(--muted); }
+.vis-toggle { width: 34px; height: 19px; }
+.cat-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(240,165,0,0.12); border: 1px solid rgba(240,165,0,0.25); color: var(--gold); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin: 4px; }
+.cat-chip button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+
 .spin { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 30px auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -159,6 +177,10 @@ select.finput option { background: var(--navy); }
     <div class="atab" onclick="showATab('add',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       Add Product
+    </div>
+    <div class="atab" onclick="showATab('suppliers',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Suppliers
     </div>
     <div class="atab" onclick="showATab('settings',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
@@ -269,6 +291,81 @@ select.finput option { background: var(--navy); }
   </div>
 </div>
 
+
+<!-- SUPPLIERS TAB -->
+<div id="apage-suppliers" class="apage">
+
+  <!-- Categories management -->
+  <div class="acard">
+    <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categories</h5>
+    <div id="cat-chips"></div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <input class="finput" type="text" id="new-cat-input" placeholder="New category name..." style="flex:1;">
+      <button class="btn-update" onclick="addCategory()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- Add Supplier -->
+  <div class="acard">
+    <h5><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Supplier</h5>
+
+    <div class="mb-3">
+      <label class="lbl">Logo / Profile Photo</label>
+      <div class="img-drop" id="sup-drop-zone" ondragover="onDragOver(event,'sup')" ondragleave="onDragLeave(event,'sup')" ondrop="onDrop(event,'sup')">
+        <input type="file" id="sup-img-file" accept="image/*" onchange="onFileSelect(event,'sup')">
+        <div id="sup-drop-content">
+          <div class="img-drop-icon">🏢</div>
+          <p>Tap to upload logo</p>
+          <small>JPG, PNG, WEBP — max 5MB</small>
+        </div>
+        <div class="upload-progress" id="sup-upload-prog"><div class="upload-bar" id="sup-upload-bar"></div></div>
+      </div>
+      <input type="hidden" id="sup-img-url" value="">
+    </div>
+
+    <div class="mb-3">
+      <label class="lbl">Supplier Name *</label>
+      <input class="finput" type="text" id="sn-name" placeholder="Company / Supplier name">
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Category *</label>
+      <select class="finput" id="sn-cat"><option value="">Select category...</option></select>
+    </div>
+    <div class="mb-3">
+      <label class="lbl">About / Description</label>
+      <textarea class="finput" id="sn-about" rows="3" placeholder="Brief description..." style="resize:vertical;"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Website URL</label>
+      <input class="finput" type="url" id="sn-website" placeholder="https://...">
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Phone Number</label>
+      <input class="finput" type="tel" id="sn-phone" placeholder="+66...">
+    </div>
+    <div class="mb-3">
+      <label class="lbl">Line ID</label>
+      <input class="finput" type="text" id="sn-line" placeholder="@lineid">
+    </div>
+
+    <div class="acard" style="margin:0 0 16px; background:var(--navy);">
+      <h5 style="margin-bottom:10px; font-size:12px;">👁️ Visibility Settings</h5>
+      <div class="vis-row"><label>Hide Website</label><input type="checkbox" class="vis-toggle form-check-input" id="sn-hw"></div>
+      <div class="vis-row"><label>Hide Phone</label><input type="checkbox" class="vis-toggle form-check-input" id="sn-hp"></div>
+      <div class="vis-row"><label>Hide Line</label><input type="checkbox" class="vis-toggle form-check-input" id="sn-hl"></div>
+      <div class="vis-row"><label>Hide About</label><input type="checkbox" class="vis-toggle form-check-input" id="sn-ha"></div>
+    </div>
+
+    <button class="btn-pri" onclick="addSupplier()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Supplier
+    </button>
+  </div>
+
+  <!-- Supplier List -->
+  <div id="sup-admin-list"><div class="spin"></div></div>
+</div>
+
 <!-- EDIT MODAL -->
 <div id="edit-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
@@ -324,6 +421,59 @@ select.finput option { background: var(--navy); }
   </div>
 </div>
 
+
+<!-- SUPPLIER EDIT MODAL -->
+<div id="sup-edit-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeSupModal()">
+  <div class="modal-box">
+    <h4>✏️ Edit Supplier</h4>
+    <input type="hidden" id="se-id">
+
+    <div class="mb-3">
+      <label class="lbl">Logo</label>
+      <div class="img-drop" id="se-drop-zone" ondragover="onDragOver(event,'se')" ondragleave="onDragLeave(event,'se')" ondrop="onDrop(event,'se')">
+        <input type="file" id="se-img-file" accept="image/*" onchange="onFileSelect(event,'se')">
+        <div id="se-drop-content"><div class="img-drop-icon">🏢</div><p>Tap to replace logo</p></div>
+        <div class="upload-progress" id="se-upload-prog"><div class="upload-bar" id="se-upload-bar"></div></div>
+      </div>
+      <input type="hidden" id="se-img-url">
+    </div>
+
+    <div class="mb-2"><label class="lbl">Name</label><input class="finput" type="text" id="se-name"></div>
+    <div class="mb-2">
+      <label class="lbl">Category</label>
+      <select class="finput" id="se-cat"><option value="">Select...</option></select>
+    </div>
+    <div class="mb-2"><label class="lbl">About</label><textarea class="finput" id="se-about" rows="3" style="resize:vertical;"></textarea></div>
+    <div class="mb-2"><label class="lbl">Website</label><input class="finput" type="url" id="se-website"></div>
+    <div class="mb-2"><label class="lbl">Phone</label><input class="finput" type="tel" id="se-phone"></div>
+    <div class="mb-2"><label class="lbl">Line ID</label><input class="finput" type="text" id="se-line"></div>
+
+    <div class="acard" style="margin:12px 0; background:var(--navy);">
+      <h5 style="margin-bottom:8px; font-size:12px;">👁️ Visibility</h5>
+      <div class="vis-row"><label>Hide Website</label><input type="checkbox" class="vis-toggle form-check-input" id="se-hw"></div>
+      <div class="vis-row"><label>Hide Phone</label><input type="checkbox" class="vis-toggle form-check-input" id="se-hp"></div>
+      <div class="vis-row"><label>Hide Line</label><input type="checkbox" class="vis-toggle form-check-input" id="se-hl"></div>
+      <div class="vis-row"><label>Hide About</label><input type="checkbox" class="vis-toggle form-check-input" id="se-ha"></div>
+    </div>
+
+    <div class="mb-2">
+      <label class="lbl">Status</label>
+      <select class="finput" id="se-active">
+        <option value="true">✅ Active</option>
+        <option value="false">⛔ Hidden</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sml btn-cancel" style="flex:1; padding:12px; font-size:14px;" onclick="closeSupModal()">Cancel</button>
+      <button class="btn-sml btn-save" style="flex:2; padding:12px; font-size:14px;" onclick="saveSupEdit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
@@ -335,6 +485,7 @@ select.finput option { background: var(--navy); }
 const SUPABASE_URL = "https://lcxiilnovbzytkvkzrfq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjeGlpbG5vdmJ6eXRrdmt6cmZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ0NDAsImV4cCI6MjA5MjU5MDQ0MH0.MHqm0SyoVAc4xureTM37L0mS4XJ6aakywemZ9ckqPbo";
 // ============================================================
+
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ADMIN_PASS = "PAING123";
@@ -349,6 +500,8 @@ function doLogin() {
     document.getElementById('admin-screen').style.display = 'block';
     loadProducts();
     loadSettings();
+    loadCategories();
+    loadSuppliersAdmin();
   } else {
     document.getElementById('err-msg').style.display = 'block';
     document.getElementById('pass-input').value = '';
@@ -368,32 +521,35 @@ function showATab(id, el) {
   document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
   document.getElementById('apage-' + id).classList.add('active');
   el.classList.add('active');
+  if (id === 'suppliers') { loadCategories(); loadSuppliersAdmin(); }
 }
 
 // ===== IMAGE UPLOAD =====
-function onDragOver(e, isEdit) { e.preventDefault(); (isEdit ? document.getElementById('edit-drop-zone') : document.getElementById('drop-zone')).classList.add('over'); }
-function onDragLeave(e, isEdit) { (isEdit ? document.getElementById('edit-drop-zone') : document.getElementById('drop-zone')).classList.remove('over'); }
-function onDrop(e, isEdit) {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (file) handleImageFile(file, isEdit);
+function getDropZoneId(ctx) {
+  if (ctx === true || ctx === 'edit') return 'edit-drop-zone';
+  if (ctx === 'sup') return 'sup-drop-zone';
+  if (ctx === 'se') return 'se-drop-zone';
+  return 'drop-zone';
 }
-function onFileSelect(e, isEdit) {
-  const file = e.target.files[0];
-  if (file) handleImageFile(file, isEdit);
-}
+function onDragOver(e, ctx) { e.preventDefault(); document.getElementById(getDropZoneId(ctx)).classList.add('over'); }
+function onDragLeave(e, ctx) { document.getElementById(getDropZoneId(ctx)).classList.remove('over'); }
+function onDrop(e, ctx) { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) handleImageFile(file, ctx); }
+function onFileSelect(e, ctx) { const file = e.target.files[0]; if (file) handleImageFile(file, ctx); }
 
-function handleImageFile(file, isEdit) {
+function handleImageFile(file, ctx) {
   if (!file.type.startsWith('image/')) { toast('Image files only', false); return; }
   if (file.size > 5 * 1024 * 1024) { toast('Max 5MB', false); return; }
-  if (isEdit) editPendingUploadFile = file;
+  if (ctx === true || ctx === 'edit') editPendingUploadFile = file;
+  else if (ctx === 'sup') supPendingFile = file;
+  else if (ctx === 'se') sePendingFile = file;
   else pendingUploadFile = file;
 
+  const prefixMap = { true: 'edit-', edit: 'edit-', sup: 'sup-', se: 'se-' };
+  const prefix = prefixMap[ctx] || '';
   const reader = new FileReader();
-  reader.onload = (e) => {
-    const prefix = isEdit ? 'edit-' : '';
+  reader.onload = (ev) => {
     document.getElementById(prefix + 'drop-content').innerHTML =
-      `<img class="img-preview" src="${e.target.result}"><p style="font-size:12px;color:var(--green)">✅ ${file.name}</p>`;
+      '<img class="img-preview" src="' + ev.target.result + '"><p style="font-size:12px;color:var(--green)">✅ ' + file.name + '</p>';
   };
   reader.readAsDataURL(file);
 }
@@ -497,6 +653,7 @@ async function deleteProduct(id, imgUrl) {
 }
 
 async function toggleActive(id, current) {
+  // current arrives as boolean or string 'true'/'false' from HTML template
   const isCurrentlyActive = current === true || current === 'true';
   const { error } = await sb.from('products').update({ is_active: !isCurrentlyActive }).eq('id', id);
   if (error) { toast('Error: ' + error.message, false); return; }
@@ -568,6 +725,222 @@ async function saveSetting(key, inputId) {
   const { error } = await sb.from('settings').upsert({ key, value: String(val), updated_at: new Date().toISOString() });
   if (error) { toast('Error: ' + error.message, false); return; }
   toast('✅ Saved: ' + key, true);
+}
+
+
+// ===== SUPPLIER IMAGE UPLOAD (extend existing) =====
+let supPendingFile = null;
+let sePendingFile = null;
+
+// ===== CATEGORIES =====
+let categories = [];
+
+async function loadCategories() {
+  const { data } = await sb.from('supplier_categories').select('*').order('name');
+  if (!data) return;
+  categories = data.map(c => c.name);
+  renderCatChips();
+  populateCatSelects();
+}
+
+function renderCatChips() {
+  const el = document.getElementById('cat-chips');
+  if (!el) return;
+  el.innerHTML = categories.length ? categories.map(c =>
+    `<span class="cat-chip">${c}<button onclick="deleteCategory('${c}')">×</button></span>`
+  ).join('') : '<span style="color:var(--muted); font-size:12px;">No categories yet</span>';
+}
+
+function populateCatSelects() {
+  ['sn-cat','se-cat'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = '<option value="">Select category...</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (cur) el.value = cur;
+  });
+}
+
+async function addCategory() {
+  const name = document.getElementById('new-cat-input').value.trim();
+  if (!name) return;
+  const { error } = await sb.from('supplier_categories').insert({ name });
+  if (error) { toast('Error: ' + error.message, false); return; }
+  document.getElementById('new-cat-input').value = '';
+  toast('✅ Category added', true);
+  loadCategories();
+}
+
+async function deleteCategory(name) {
+  if (!confirm('Delete category "' + name + '"?')) return;
+  const { error } = await sb.from('supplier_categories').delete().eq('name', name);
+  if (error) { toast('Error', false); return; }
+  toast('🗑️ Deleted', true);
+  loadCategories();
+}
+
+// ===== SUPPLIERS ADMIN =====
+async function loadSuppliersAdmin() {
+  const list = document.getElementById('sup-admin-list');
+  if (!list) return;
+  list.innerHTML = '<div class="spin"></div>';
+  const { data, error } = await sb.from('suppliers').select('*').order('name');
+  if (error || !data) { list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">Error</p>'; return; }
+  if (!data.length) { list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:30px;">No suppliers yet</p>'; return; }
+  list.innerHTML = data.map(s => `
+    <div class="sup-item">
+      <div class="sup-item-top">
+        <div class="sup-logo-sm">
+          ${s.logo_url ? `<img src="${s.logo_url}" onerror="this.parentElement.textContent='🏢'">` : '🏢'}
+        </div>
+        <div class="sup-item-info">
+          <div class="sup-item-name">${s.name} ${!s.is_active ? '<span class="inactive-badge">HIDDEN</span>' : ''}</div>
+          <div class="sup-item-cat">${s.category || ''}</div>
+          <div class="sup-item-meta">
+            ${s.phone && !s.hide_phone ? '📞 ' + s.phone : ''}
+            ${s.line_id && !s.hide_line ? ' · Line: ' + s.line_id : ''}
+          </div>
+        </div>
+      </div>
+      <div class="sup-actions">
+        <button class="btn-sml btn-edit" onclick="openSupEdit(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="btn-sml btn-del" onclick="deleteSupplier('${s.id}','${s.logo_url || ''}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Delete
+        </button>
+        <button class="btn-sml ${s.is_active ? 'btn-del' : 'btn-save'}" onclick="toggleSupplier('${s.id}','${s.is_active}')">
+          ${s.is_active ? '⛔ Hide' : '✅ Show'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function addSupplier() {
+  const name = document.getElementById('sn-name').value.trim();
+  const cat = document.getElementById('sn-cat').value;
+  if (!name) { toast('Name is required', false); return; }
+
+  let logo_url = null;
+  if (supPendingFile) {
+    logo_url = await uploadImageGen(supPendingFile, 'sup-upload-prog', 'sup-upload-bar', 'suppliers');
+    if (!logo_url) return;
+  }
+
+  const row = {
+    name, category: cat,
+    about: document.getElementById('sn-about').value.trim(),
+    website: document.getElementById('sn-website').value.trim(),
+    phone: document.getElementById('sn-phone').value.trim(),
+    line_id: document.getElementById('sn-line').value.trim(),
+    logo_url,
+    hide_website: document.getElementById('sn-hw').checked,
+    hide_phone: document.getElementById('sn-hp').checked,
+    hide_line: document.getElementById('sn-hl').checked,
+    hide_about: document.getElementById('sn-ha').checked,
+    is_active: true
+  };
+
+  const { error } = await sb.from('suppliers').insert(row);
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('✅ Supplier added!', true);
+  ['sn-name','sn-about','sn-website','sn-phone','sn-line'].forEach(id => document.getElementById(id).value = '');
+  ['sn-hw','sn-hp','sn-hl','sn-ha'].forEach(id => document.getElementById(id).checked = false);
+  document.getElementById('sup-drop-content').innerHTML = '<div class="img-drop-icon">🏢</div><p>Tap to upload logo</p><small>JPG, PNG, WEBP — max 5MB</small>';
+  supPendingFile = null;
+  loadSuppliersAdmin();
+  showATab('suppliers', document.querySelectorAll('.atab')[2]);
+}
+
+async function deleteSupplier(id, logoUrl) {
+  if (!confirm('Delete this supplier?')) return;
+  if (logoUrl) {
+    const path = logoUrl.split('/product-images/')[1];
+    if (path) await sb.storage.from('product-images').remove([path]);
+  }
+  await sb.from('suppliers').delete().eq('id', id);
+  toast('🗑️ Deleted', true);
+  loadSuppliersAdmin();
+}
+
+async function toggleSupplier(id, current) {
+  const isActive = current === true || current === 'true';
+  await sb.from('suppliers').update({ is_active: !isActive }).eq('id', id);
+  toast(isActive ? '⛔ Hidden' : '✅ Visible', true);
+  loadSuppliersAdmin();
+}
+
+function openSupEdit(s) {
+  document.getElementById('se-id').value = s.id;
+  document.getElementById('se-name').value = s.name;
+  document.getElementById('se-about').value = s.about || '';
+  document.getElementById('se-website').value = s.website || '';
+  document.getElementById('se-phone').value = s.phone || '';
+  document.getElementById('se-line').value = s.line_id || '';
+  document.getElementById('se-img-url').value = s.logo_url || '';
+  document.getElementById('se-active').value = s.is_active ? 'true' : 'false';
+  document.getElementById('se-hw').checked = !!s.hide_website;
+  document.getElementById('se-hp').checked = !!s.hide_phone;
+  document.getElementById('se-hl').checked = !!s.hide_line;
+  document.getElementById('se-ha').checked = !!s.hide_about;
+  populateCatSelects();
+  document.getElementById('se-cat').value = s.category || '';
+  sePendingFile = null;
+  const dc = document.getElementById('se-drop-content');
+  dc.innerHTML = s.logo_url ? `<img class="img-preview" src="${s.logo_url}" onerror="this.style.display='none'"><p style="font-size:12px;color:var(--muted)">Tap to replace</p>` : '<div class="img-drop-icon">🏢</div><p>Tap to upload</p>';
+  document.getElementById('sup-edit-modal').style.display = 'flex';
+}
+function closeSupModal() { document.getElementById('sup-edit-modal').style.display = 'none'; }
+
+async function saveSupEdit() {
+  const id = document.getElementById('se-id').value;
+  const name = document.getElementById('se-name').value.trim();
+  if (!name) { toast('Name required', false); return; }
+
+  let logo_url = document.getElementById('se-img-url').value || null;
+  if (sePendingFile) {
+    logo_url = await uploadImageGen(sePendingFile, 'se-upload-prog', 'se-upload-bar', 'suppliers');
+    if (!logo_url) return;
+  }
+
+  const row = {
+    name, category: document.getElementById('se-cat').value,
+    about: document.getElementById('se-about').value.trim(),
+    website: document.getElementById('se-website').value.trim(),
+    phone: document.getElementById('se-phone').value.trim(),
+    line_id: document.getElementById('se-line').value.trim(),
+    logo_url,
+    hide_website: document.getElementById('se-hw').checked,
+    hide_phone: document.getElementById('se-hp').checked,
+    hide_line: document.getElementById('se-hl').checked,
+    hide_about: document.getElementById('se-ha').checked,
+    is_active: document.getElementById('se-active').value === 'true'
+  };
+
+  const { error } = await sb.from('suppliers').update(row).eq('id', id);
+  if (error) { toast('Error: ' + error.message, false); return; }
+  toast('✅ Saved!', true);
+  closeSupModal();
+  loadSuppliersAdmin();
+}
+
+// Generic image upload for any bucket path prefix
+async function uploadImageGen(file, progId, barId, prefix) {
+  const prog = document.getElementById(progId);
+  const bar = document.getElementById(barId);
+  prog.style.display = 'block'; bar.style.width = '30%';
+  const ext = file.name.split('.').pop();
+  const path = prefix + '/' + Date.now() + '.' + ext;
+  bar.style.width = '60%';
+  const { data, error } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+  bar.style.width = '100%';
+  if (error) { toast('Upload failed: ' + error.message, false); prog.style.display = 'none'; return null; }
+  const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+  prog.style.display = 'none';
+  return urlData.publicUrl;
 }
 
 // ===== TOAST =====
