@@ -512,6 +512,7 @@ async function doLogin() {
   }
 }
 function doLogout() {
+  sb.auth.signOut();
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('pass-input').value = '';
