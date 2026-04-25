@@ -488,14 +488,18 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const ADMIN_PASS = "PAING123";
+
 let pendingUploadFile = null;
 let editPendingUploadFile = null;
 
 // ===== LOGIN =====
-function doLogin() {
+async function doLogin() {
   const pw = document.getElementById('pass-input').value;
-  if (pw === ADMIN_PASS) {
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: 'admin@megathailand.com',
+    password: pw
+  });
+  if (error) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'block';
     loadProducts();
